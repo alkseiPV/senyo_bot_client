@@ -24,7 +24,7 @@ async def update_client(
     name: Optional[str] = None,
     surname: Optional[str] = None,
     phone: Optional[str] = None,
-    id_gender: Optional[int] = None,
+    gender: Optional[int] = None,
 ) -> None:
     payload: dict[str, object] = {"id": id}
     if name is not None:
@@ -33,7 +33,6 @@ async def update_client(
         payload["surname"] = surname
     if phone is not None:
         payload["phone"] = phone
-    if id_gender is not None:
-        payload["id_gender"] = id_gender
-
+    if gender is not None:
+        payload["gender_id"] = gender
     await base_api.put("/client", json=payload)
