@@ -1,27 +1,39 @@
-import aiohttp
-from config import settings
+from typing import Optional
+
+from models import ClientModel
+from .base import base_api
 
 
-class BackendClient:
-    def __init__(self) -> None:
-        # AnyUrl → str, иначе .rstrip() не сработает
-        self._base_url = str(settings.api_base_url).rstrip("/")
-        self._session: aiohttp.ClientSession | None = None
-
-    async def _get_session(self) -> aiohttp.ClientSession:
-        if not self._session or self._session.closed:
-            self._session = aiohttp.ClientSession()
-        return self._session
-
-    async def get_user(self, user_id: int) -> dict:
-        session = await self._get_session()
-        async with session.get(f"{self._base_url}/users/{user_id}") as resp:
-            resp.raise_for_status()
-            return await resp.json()
-
-    async def close(self) -> None:
-        if self._session and not self._session.closed:
-            await self._session.close()
+async def register_client(telegram_id: int) -> None:
+    await base_api.post("/client", json={"telegram_id": telegram_id})
 
 
-backend = BackendClient()
+async def get_client_info(client_id: int, *, is_telegram: bool = False) -> ClientModel:
+    path = (
+        f"/client/telegram/{client_id}"
+        if is_telegram else
+        f"/client/{client_id}"
+    )
+    data = await base_api.get(path)
+    return ClientModel(**data)
+
+
+async def update_client(
+    *,
+    id: int,
+    name: Optional[str] = None,
+    surname: Optional[str] = None,
+    phone: Optional[str] = None,
+    id_gender: Optional[int] = None,
+) -> None:
+    payload: dict[str, object] = {"id": id}
+    if name is not None:
+        payload["name"] = name
+    if surname is not None:
+        payload["surname"] = surname
+    if phone is not None:
+        payload["phone"] = phone
+    if id_gender is not None:
+        payload["id_gender"] = id_gender
+
+    await base_api.put("/client", json=payload)
