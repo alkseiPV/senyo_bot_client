@@ -9,11 +9,11 @@ async def get_referrals(client_id: int) -> List[ReferralsModel]:
     return [ReferralsModel(**item) for item in data]
 
 
-async def create_referral(client_id: int, referral_phone: str, *, is_active: bool = True) -> ReferralsModel:
+async def create_referral(client_id: int, referral_phone: str, *, is_active: bool = False) -> ReferralsModel:
     payload = {
         "id_client": client_id,
-        "referral_phone": referral_phone,
-        "is_active": is_active,
+        "refferal_phone": referral_phone,
+        # "is_active": is_active,
     }
     data = await base_api.post("/referrals", json=payload)
     return ReferralsModel(**data)

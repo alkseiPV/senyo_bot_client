@@ -59,7 +59,7 @@ async def cmd_start(
         gender=client.gender or "",
         permanent_points=client.permanent_points,
         temporary_points=client.temporary_points,
-        addresses=[addr.address for addr in client.addresses],
+       addresses=[addr.model_dump() for addr in client.addresses],
     )
 
     # 3) выясняем, что ещё нужно спросить
@@ -117,7 +117,7 @@ async def gender_chosen(message: Message, state: FSMContext):
     gender_id = 1 if selected == "Мужской" else 2  # ID справочника полов
 
     data = await state.get_data()
-    d =  await update_client(id=data["client_id"], gender=gender_id)   # ⬅ строка
+    await update_client(id=data["client_id"], gender=gender_id)   # ⬅ строка
     await state.update_data(gender=gender_id)
 
     # Если номера ещё нет, ждём его; иначе — в главное меню
