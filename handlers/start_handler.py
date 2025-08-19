@@ -54,6 +54,8 @@ async def cmd_start(
 
     # 2) кладём нужные поля в FSM-state (можно доставать в других хендлерах)
     await state.update_data(
+        name = client.name,
+        surname = client.surname,
         client_id=client.id,
         phone=client.phone or "",
         gender=client.gender or "",

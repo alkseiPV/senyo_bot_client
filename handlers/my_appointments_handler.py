@@ -36,7 +36,7 @@ async def show_my_appointments(message: Message, state: FSMContext):
             text = "Ваши активные записи: \n\n"
             active_appointments.sort(key=lambda a: a.date)
             for app in active_appointments:
-                status_text = "подтверждена" if app.status == "active" else "ожидание"
+                status_text = "подтверждена" if app.status == "подтвержден" else "ожидание"
                 time_str = app.date.strftime("%d.%m.%Y %H:%M")
                 text += f"{time_str}\n{app.service_name} ({status_text})\n\n"
         
