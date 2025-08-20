@@ -11,7 +11,6 @@ async def create_appointment(
     id_service: int,
     id_place_type: int,
     date_iso: str,
-    used_points: int = 0,
     user_agent: str = "client",
 ) -> None:
     """
@@ -25,7 +24,6 @@ async def create_appointment(
         "final_sum": final_sum,
         "id_services": id_service,
         "id_place_type": id_place_type,
-        "used_points": used_points,
     }
     await base_api.post(path, json=payload)
 

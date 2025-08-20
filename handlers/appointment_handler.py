@@ -38,7 +38,7 @@ class AppointmentStates(StatesGroup):
 async def start_appointment(message: Message, state: FSMContext):
     """Показываем меню записи на приём."""
     data = await state.get_data()
-    await message.answer("Записаться на приём:", reply_markup=appointment_keyboard(data))
+    await message.answer("📅Записаться на приём:", reply_markup=appointment_keyboard(data))
     await state.set_state(AppointmentStates.menu)
 
 
@@ -54,7 +54,7 @@ async def start_choose_points(message: Message, state: FSMContext):
     available = int(data.get("permanent_points", 0.0) + data.get("temporary_points", 0.0))
     max_deduct = min(available, int(service['price'] * 0.5))
     
-    await message.answer(f"Введите количество баллов для списания (0 - {max_deduct}):", reply_markup=ReplyKeyboardRemove())
+    await message.answer(f"💰 Введите количество баллов для списания (0 - {max_deduct}):", reply_markup=ReplyKeyboardRemove())
     await state.set_state(AppointmentStates.choosing_points)
 
 @router.message(AppointmentStates.choosing_points)
@@ -106,7 +106,7 @@ async def start_choose_service(message: Message, state: FSMContext):
         kb_builder.button(text="Назад")
         kb_builder.adjust(1)
         
-        await message.answer("Выберите услугу:", reply_markup=kb_builder.as_markup(resize_keyboard=True))
+        await message.answer("🛎 Выберите услугу:", reply_markup=kb_builder.as_markup(resize_keyboard=True))
         await state.set_state(AppointmentStates.choosing_service)
     except Exception as e:
         logger.error(f"Ошибка при получении услуг: {e}")
@@ -131,7 +131,7 @@ async def select_service(message: Message, state: FSMContext):
         await state.update_data(selected_service=selected.model_dump())
         await state.set_state(AppointmentStates.menu)
         data = await state.get_data()
-        await message.answer(f"Услуга выбрана: {selected.title}", reply_markup=appointment_keyboard(data))
+        await message.answer(f"✅ Услуга выбрана: {selected.title}", reply_markup=appointment_keyboard(data))
     except Exception as e:
         logger.error(f"Ошибка при выборе услуги: {e}")
         await message.answer("Произошла ошибка.")
@@ -173,7 +173,7 @@ async def start_choose_place(message: Message, state: FSMContext):
         kb_builder.button(text="Назад")
         kb_builder.adjust(1)
         
-        await message.answer("Выберите место проведения:", reply_markup=kb_builder.as_markup(resize_keyboard=True))
+        await message.answer("📍Выберите место проведения:", reply_markup=kb_builder.as_markup(resize_keyboard=True))
         await state.set_state(AppointmentStates.choosing_place)
     except Exception as e:
         logger.error(f"Ошибка при получении мест: {e}")
@@ -198,7 +198,7 @@ async def select_place(message: Message, state: FSMContext):
         await state.update_data(selected_place_type=selected.model_dump(), selected_address_id=None)
         await state.set_state(AppointmentStates.menu)
         data = await state.get_data()
-        await message.answer(f"Место выбрано: {selected.title}", reply_markup=appointment_keyboard(data))
+        await message.answer(f"✅ Место выбрано: {selected.title}", reply_markup=appointment_keyboard(data))
         
         if "дом" in selected.title.lower():
             await start_choose_address(message, state)
@@ -215,7 +215,7 @@ async def start_choose_address(message: Message, state: FSMContext):
         await state.set_state(AppointmentStates.waiting_new_address)
         return
     
-    text = "Выберите адрес (введите номер):\n"
+    text = "📍 Выберите адрес (введите номер):\n"
     for i, addr in enumerate(addresses, 1):
         text += f"{i}. {addr['address']}\n"
     
@@ -235,7 +235,7 @@ async def select_address(message: Message, state: FSMContext):
         await state.update_data(selected_address_id=selected['id'])
         await state.set_state(AppointmentStates.menu)
         data = await state.get_data()
-        await message.answer(f"Адрес выбран: {selected['address']}", reply_markup=appointment_keyboard(data))
+        await message.answer(f"✅ Адрес выбран: {selected['address']}", reply_markup=appointment_keyboard(data))
     except (ValueError, IndexError):
         await message.answer("Неверный выбор. Попробуйте снова.")
 
@@ -243,7 +243,7 @@ async def select_address(message: Message, state: FSMContext):
 async def add_new_address(message: Message, state: FSMContext):
     address_str = message.text.strip()
     if not address_str:
-        await message.answer("Адрес не может быть пустым. Попробуйте снова.")
+        await message.answer("❌Адрес не может быть пустым. Попробуйте снова.")
         return
     
     try:
@@ -258,7 +258,7 @@ async def add_new_address(message: Message, state: FSMContext):
         await state.update_data(addresses=addresses, selected_address_id=new_addr.id)
         await state.set_state(AppointmentStates.name)
         data = await state.get_data()
-        await message.answer(f"Адрес добавлен и выбран: {address_str}", reply_markup=appointment_keyboard(data))
+        await message.answer(f"✅ Адрес добавлен и выбран: {address_str}", reply_markup=appointment_keyboard(data))
     except Exception as e:
         logger.error(f"Ошибка при добавлении адреса: {e}")
         await message.answer("Произошла ошибка при добавлении адреса.")
@@ -278,7 +278,7 @@ async def create_appointment_handler(message: Message, state: FSMContext):
         address_id = data.get('selected_address_id')
         
         if requires_address and address_id is None:
-            await message.answer("Для этого места требуется адрес. Выберите его.")
+            await message.answer("❌ Для этого места требуется адрес. Выберите его.")
             await start_choose_address(message, state)
             return
         
@@ -294,7 +294,7 @@ async def create_appointment_handler(message: Message, state: FSMContext):
             date_iso=data['selected_date']
         )
         
-        await message.answer("Запись успешно создана!")
+        await message.answer("✅ Запись успешно создана!😊 ")
         
         # Clear appointment data
         keys_to_keep = ['client_id', 'phone', 'gender', 'permanent_points', 'temporary_points', 'addresses']
@@ -303,5 +303,5 @@ async def create_appointment_handler(message: Message, state: FSMContext):
         await state.set_state(None)
         await message.answer("Возращаемся в главное меню", reply_markup=main_menu_keyboard())
     except Exception as e:
-        logger.error(f"Ошибка при создании записи: {e}")
-        await message.answer("Произошла ошибка при создании записи.")
+        logger.error(f"❌ Ошибка при создании записи: {e}")
+        await message.answer("❌ Произошла ошибка при создании записи.")

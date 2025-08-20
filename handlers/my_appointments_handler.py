@@ -31,9 +31,9 @@ async def show_my_appointments(message: Message, state: FSMContext):
         active_appointments = [app for app in appointments if app.status in ["ожидание", "подтвержден"]]
         
         if not active_appointments:
-            text = "У вас нет активных записей."
+            text = "😔 У вас нет активных записей."
         else:
-            text = "Ваши активные записи: \n\n"
+            text = "📅 Ваши активные записи: \n\n"
             active_appointments.sort(key=lambda a: a.date)
             for app in active_appointments:
                 status_text = "подтверждена" if app.status == "подтвержден" else "ожидание"
@@ -68,7 +68,7 @@ async def start_cancel(message: Message, state:FSMContext):
         active_appointments = [app for app in appointments if app.status in ["ожидание", "подтвержден"]]
         
         if not active_appointments:
-            await message.answer("Нет записей для отмены.")
+            await message.answer("😔 Нет записей для отмены.")
             await state.set_state(MyAppointments.viewing)  # Остаёмся в viewing
             return
 
@@ -78,7 +78,7 @@ async def start_cancel(message: Message, state:FSMContext):
             inline_kb.inline_keyboard.append(
                 [InlineKeyboardButton(text=time_str, callback_data=f"cancel_{app.id}")]
             )
-        await message.answer("Выберите запись для отмены:", reply_markup= inline_kb)
+        await message.answer("🗑 Выберите запись для отмены:", reply_markup= inline_kb)
         await state.set_state(MyAppointments.canceling)
     except Exception as e:
         logger.error(f"Ошибка при подготовке отмены: {e}")
@@ -91,10 +91,10 @@ async def cancel_appointment_callback(callback: CallbackQuery, state: FSMContext
         app_id = int(callback.data.split("_")[1])  # Парсим ID записи из callback_data
         await cancel_appointment(appointment_id=app_id)  # Вызов API для отмены
         await callback.message.delete()  # Удаляем сообщение с inline-клавиатурой
-        await callback.answer("Запись отменена успешно.")  # Показываем попап-уведомление
-        await callback.message.answer("Запись отменена. Возвращаемся в главное меню:", reply_markup=main_menu_keyboard())
+        await callback.answer("✅ Запись отменена успешно.")  # Показываем попап-уведомление
+        await callback.message.answer("✅ Запись отменена. Возвращаемся в главное меню:", reply_markup=main_menu_keyboard())
         await state.set_state(None)  # Сбрасываем состояние
     except Exception as e:
-        logger.error(f"Ошибка при обработке callback: {e}")
-        await callback.answer("Произошла ошибка при отмене. Попробуйте позже.")
+        logger.error(f"❌ Ошибка при обработке callback: {e}")
+        await callback.answer("❌ Произошла ошибка при отмене. Попробуйте позже.")
             

@@ -26,9 +26,9 @@ async def check_balance(message:Message,state: FSMContext):
         return
     
     response = (
-        f"Ваш баланс:\n"
-        f"Постоянные баллы: {client.permanent_points}\n"
-        f"Временные баллы: {client.temporary_points}"
+        f"💰 Ваш баланс:\n"
+        f"💰 Постоянные баллы: {client.permanent_points}\n"
+        f"💰 Временные баллы: {client.temporary_points}"
     )
 
     await message.answer(response,reply_markup=main_menu_keyboard())

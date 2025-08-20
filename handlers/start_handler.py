@@ -70,12 +70,12 @@ async def cmd_start(
 
     if missing_phone or missing_gender:
         await message.answer(
-            "Для продолжения пришлите ваш номер и выберите пол:",
+            "👋 Для продолжения пришлите ваш номер и выберите пол:",
             reply_markup=initial_keyboard(),
         )
     else:
         await message.answer(
-            "С возвращением! Выберите действие:",
+            "👋 С возвращением! Выберите действие:",
             reply_markup=main_menu_keyboard(),
         )
 
@@ -95,12 +95,12 @@ async def contact_received(message: Message, state: FSMContext):
     # Проверяем, нужен ли ещё пол
     if not data.get("gender"):
         await message.answer(
-            "Спасибо! Теперь выберите пол:",
+            "✅ Спасибо! Теперь выберите пол:",
             reply_markup=gender_keyboard(),
         )
     else:
         await message.answer(
-            "Данные обновлены. Что делаем дальше?",
+            "✅ Данные обновлены. Что делаем дальше?",
             reply_markup=main_menu_keyboard(),
         )
 
@@ -110,7 +110,7 @@ async def contact_received(message: Message, state: FSMContext):
 # ──────────────────────────
 @router.message(F.text.casefold() == "🚻 выбрать пол")
 async def ask_gender(message: Message):
-    await message.answer("Выберите пол:", reply_markup=gender_keyboard())
+    await message.answer("🚻 Выберите пол:", reply_markup=gender_keyboard())
 
 
 @router.message(F.text.in_(["Мужской", "Женский"]))
@@ -125,7 +125,7 @@ async def gender_chosen(message: Message, state: FSMContext):
     # Если номера ещё нет, ждём его; иначе — в главное меню
     if not data.get("phone"):
         await message.answer(
-            "Пол сохранён. Пришлите, пожалуйста, номер телефона 👇",
+            "🚻 Пол сохранён. Пришлите, пожалуйста, номер телефона 👇",
             reply_markup=ReplyKeyboardMarkup(
                 keyboard=[[KeyboardButton(text="📞 Поделиться номером", request_contact=True)]],
                 resize_keyboard=True,
@@ -133,6 +133,6 @@ async def gender_chosen(message: Message, state: FSMContext):
         )
     else:
         await message.answer(
-            "Отлично! Данные обновлены.",
+            "✅ Отлично! Данные обновлены.",
             reply_markup=main_menu_keyboard(),
         )

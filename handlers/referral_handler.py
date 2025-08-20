@@ -30,7 +30,7 @@ async def invite_friend(message:Message,state:FSMContext):
     )
 
     await message.answer(
-        "Нужно ввести номер телефона друга, когда он активирует бота и запишется на первый приём, "
+        "👥 Нужно ввести номер телефона друга, когда он активирует бота и запишется на первый приём, "
         "вам обоим начислится по 500 баллов. пример ввода:\n"
         "7 800 555 35 35\n"
         "(можно без пробелов)\n"
@@ -48,7 +48,7 @@ async def procces_referral_phone(message:Message,state:FSMContext):
     После успеха или ошибки возвращает в главное меню.
     """
     if message.text =="Назад":
-        await message.answer("Приглашения отменено.", reply_markup=main_menu_keyboard())
+        await message.answer("😔 Приглашения отменено.", reply_markup=main_menu_keyboard())
         return
     
     data = await state.get_data()
@@ -57,7 +57,7 @@ async def procces_referral_phone(message:Message,state:FSMContext):
 
     if not referral_phone.isdigit() or not (10 <= len(referral_phone) <= 12):
         await message.answer(
-            "Некорректный номер. Пример: 78005553535 или 7 800 555 35 35. Попробуйте снова или нажмите 'Назад'.",
+            "❌ Некорректный номер. Пример: 78005553535 или 7 800 555 35 35. Попробуйте снова или нажмите 'Назад'.",
             reply_markup=ReplyKeyboardMarkup(
                 keyboard=[[KeyboardButton(text="Назад")]],
                 resize_keyboard=True,
@@ -70,14 +70,14 @@ async def procces_referral_phone(message:Message,state:FSMContext):
         referral = await create_referral(client_id=client_id, referral_phone=referral_phone,is_active=False)
         logger.info("Referral created for client %s: %s", client_id, referral.id)
         await message.answer(
-            f"Друг приглашён! Когда он зарегистрируется и запишется, вы оба получите по 500 баллов.",
+            f"✅ Друг приглашён! Когда он зарегистрируется и запишется, вы оба получите по 500 баллов. 😊",
             reply_markup=main_menu_keyboard(),
         )
     except Exception as err:
         logger.error("Error creating referral: %s", err)
         error_msg = "Ошибка при приглашении. Возможно, этот номер уже приглашён или проблема с сервером. Попробуйте позже."
         if "unique" in str(err).lower():  # Пример обработки ошибки уникальности, если API возвращает такую
-            error_msg = "Этот номер уже приглашён вами или кем-то другим."
+            error_msg = "❌ Этот номер уже приглашён вами или кем-то другим."
         await message.answer(error_msg, reply_markup=main_menu_keyboard())
     
     await state.clear()

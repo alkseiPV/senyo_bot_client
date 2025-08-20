@@ -16,16 +16,16 @@ async def show_promotions(message:Message):
         promotions = await get_promotions()
         if not promotions:
             await message.answer(
-                "На данный момент активных промоакций нет.",
+                "😔 На данный момент активных промоакций нет.",
                 reply_markup=promotions_back_keyboard(),
             )
             return
-        promo_text = "Доступные промоакции: \n\n"
+        promo_text = "🎁 Доступные промоакции: \n\n"
         for promo in promotions:
             promo_text += (
                 f"**{promo.title}**\n"
                 f"{promo.description}\n"
-                f"Баллы: {promo.added_points}\n"
+                f"💰 Баллы: {promo.added_points}\n"
                 f"Для: {promo.gender}\n"
                 f"С {promo.start_date.strftime('%d.%m.%Y')} по {promo.expiration_date.strftime('%d.%m.%Y')}\n\n"
             )

@@ -36,7 +36,7 @@ class Friends(StatesGroup):
 
 @router.message(F.text == "ПРОФИЛЬ")
 async def show_profile(message:Message,state: FSMContext):
-    await message.answer("Ваш профиль:", reply_markup=profile_keyboard())
+    await message.answer("👤 Ваш профиль:", reply_markup=profile_keyboard())
 
 #──────────────────────────
 #   Изменить ФИО
@@ -49,7 +49,7 @@ async def start_edit_fio(message: Message, state: FSMContext):
     current_surname = data.get("surname", "Не указано")
     
     await message.answer(
-        f"Текущее ФИО: {current_name} {current_surname}.\nВведите ваше имя:",
+        f"👤 Текущее ФИО: {current_name} {current_surname}.\nВведите ваше имя:",
         reply_markup=back_keyboard()  # ← Keyboard с "Назад" вместо Remove
     )
     await state.set_state(EditFIO.waiting_for_name)
@@ -59,14 +59,14 @@ async def start_edit_fio(message: Message, state: FSMContext):
 async def cancel_edit_fio(message: Message, state: FSMContext):
     """Отмена изменения ФИО, возврат в профиль."""
     await state.set_state(None)  # Очищаем состояние (как указано в стиле: state.set_state(None) вместо clear)
-    await message.answer("Изменение ФИО отменено.", reply_markup=profile_keyboard())
+    await message.answer("❌ Изменение ФИО отменено.", reply_markup=profile_keyboard())
 
 @router.message(EditFIO.waiting_for_name)
 async def receive_name(message: Message, state: FSMContext):
     """Сохраняем имя и просим фамилию с клавиатурой 'Назад'."""
     name = message.text.strip()
     if not name:
-        await message.answer("Имя не может быть пустым. Попробуйте снова:", reply_markup=back_keyboard())
+        await message.answer("❌ Имя не может быть пустым. Попробуйте снова:", reply_markup=back_keyboard())
         return
     await state.update_data(new_name=name)
     await message.answer("Теперь введите вашу фамилию:", reply_markup=back_keyboard())  # ← Добавлен keyboard
@@ -122,7 +122,7 @@ async def all_records(message: Message, state: FSMContext):
     try:
         appointments = await get_appointments(client_id=client_id)
         if not appointments:
-            await message.answer("У вас нет записей.", reply_markup=ReplyKeyboardMarkup(
+            await message.answer("😔 У вас нет записей.", reply_markup=ReplyKeyboardMarkup(
                 keyboard=[[KeyboardButton(text="Назад")]],
                 resize_keyboard=True,
             ))
@@ -134,7 +134,7 @@ async def all_records(message: Message, state: FSMContext):
 
         text = "Для получения записей за опр. месяц введите его в чат, Пример: Март 2025\n\nВаши последние (20) записи:\n"
         for app in recent:
-            points_text =f"Начислено {app.client_points} баллов" if app.used_points is None else f"Использовано {app.used_points} баллов"
+            points_text =f"✅ Начислено {app.client_points} баллов" if app.used_points is None else f"Использовано {app.used_points} баллов"
             text += f"{app.date.strftime('%d.%m.%Y')} - {app.service_name} {app.final_sum} руб ({points_text})\n"
             
         await message.answer(text, reply_markup=ReplyKeyboardMarkup(
@@ -165,7 +165,7 @@ async def filter_by_month(message:Message, state:FSMContext):
     try:
         appointments = await get_appointments(client_id=client_id)
         if not appointments:
-            await message.answer("У вас нет записей.")
+            await message.answer("😔 У вас нет записей.")
             await state.set_state(None)
             return
         
@@ -180,10 +180,10 @@ async def filter_by_month(message:Message, state:FSMContext):
         
         filtered = [app for app in appointments if app.date.month == month_num and app.date.year == year]
         if not filtered:
-            await message.answer(f"Нет записей за {month_input}.")
+            await message.answer(f"😔 Нет записей за {month_input}.")
             return
 
-        text = f"Записи за {month_input}:\n"
+        text = f"📅 Записи за {month_input}:\n"
         for app in filtered:
             points_text = f"Начислено {app.client_points} баллов" if app.used_points is None else f"Использовано {app.used_points} баллов"
             text += f"{app.date.strftime('%d.%m.%Y')} - {app.service_name} {app.final_sum} руб ({points_text})\n"
@@ -215,10 +215,10 @@ async def my_friends(message: Message,state: FSMContext):
     try:
         referrals: List[ReferralsModel] = await get_referrals(client_id)
         if not referrals:
-            text = "У вас нет приглашенных друзей."
+            text = "😔 У вас нет приглашенных друзей."
             
         else: 
-            text = "Ваши друзья:\n"
+            text = "👥 Ваши друзья:\n"
             for ref in referrals:
                 status = "(активирован)" if ref.is_active else "(не активирован)"
             text += f"{ref.referral_phone} {status}\n"
