@@ -34,5 +34,5 @@ async def update_client(
     if phone is not None:
         payload["phone"] = phone
     if gender is not None:
-        payload["gender_id"] = gender
+        payload["id_gender"] = gender
     await base_api.put("/client", json=payload)

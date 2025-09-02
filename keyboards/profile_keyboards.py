@@ -3,7 +3,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 def profile_keyboard() -> ReplyKeyboardMarkup:
     kb = ReplyKeyboardBuilder()
-    kb.button(text="Изменить ФИО")
+    kb.button(text="Изменить фамилию и имя")
     kb.button(text="Все записи (архив)")
     kb.button(text="Мои адреса")
     kb.button(text="Мои друзья (приглашенные)")

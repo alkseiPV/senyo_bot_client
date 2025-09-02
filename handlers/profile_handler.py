@@ -41,7 +41,7 @@ async def show_profile(message:Message,state: FSMContext):
 #──────────────────────────
 #   Изменить ФИО
 # ──────────────────────────
-@router.message(F.text == "Изменить ФИО")
+@router.message(F.text == "Изменить фамилию и имя")
 async def start_edit_fio(message: Message, state: FSMContext):
     """Начинаем процесс изменения ФИО, показываем текущее и клавиатуру 'Назад'."""
     data = await state.get_data()
@@ -49,7 +49,7 @@ async def start_edit_fio(message: Message, state: FSMContext):
     current_surname = data.get("surname", "Не указано")
     
     await message.answer(
-        f"👤 Текущее ФИО: {current_name} {current_surname}.\nВведите ваше имя:",
+        f"👤 Текущие Фамилия и имя: {current_name} {current_surname}.\nВведите ваше имя:",
         reply_markup=back_keyboard()  # ← Keyboard с "Назад" вместо Remove
     )
     await state.set_state(EditFIO.waiting_for_name)
@@ -59,7 +59,7 @@ async def start_edit_fio(message: Message, state: FSMContext):
 async def cancel_edit_fio(message: Message, state: FSMContext):
     """Отмена изменения ФИО, возврат в профиль."""
     await state.set_state(None)  # Очищаем состояние (как указано в стиле: state.set_state(None) вместо clear)
-    await message.answer("❌ Изменение ФИО отменено.", reply_markup=profile_keyboard())
+    await message.answer("❌ Изменение фамилии и имени отменено.", reply_markup=profile_keyboard())
 
 @router.message(EditFIO.waiting_for_name)
 async def receive_name(message: Message, state: FSMContext):
@@ -86,7 +86,7 @@ async def receive_surname_and_update(message: Message, state: FSMContext):
     try:
         await update_client(id=client_id, name=data["new_name"], surname=surname)
         await state.update_data(name=data["new_name"], surname=surname)  # Обновляем в FSM для будущего использования
-        await message.answer("ФИО обновлено!", reply_markup=profile_keyboard())
+        await message.answer("фамилия и имя обновлены!", reply_markup=profile_keyboard())
         await state.set_state(None)
     except Exception as e:
         logger.error(f"Ошибка обновления ФИО: {e}")
@@ -221,7 +221,7 @@ async def my_friends(message: Message,state: FSMContext):
             text = "👥 Ваши друзья:\n"
             for ref in referrals:
                 status = "(активирован)" if ref.is_active else "(не активирован)"
-            text += f"{ref.referral_phone} {status}\n"
+                text += f"{ref.referral_phone} {status}\n"
 
         keyboard = ReplyKeyboardMarkup(
             keyboard=[[KeyboardButton(text="Назад")]],

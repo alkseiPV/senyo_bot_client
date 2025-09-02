@@ -15,10 +15,11 @@ async def main():
     dp.include_router(balance_handler.router) 
     dp.include_router(referral_handler.router)
     dp.include_router(promotions_handler.router)
-    dp.include_router(profile_handler.router)
+   
     dp.include_router(address_handler.router)
     dp.include_router(my_appointments_handler.router)
     dp.include_router(appointment_handler.router)
+    dp.include_router(profile_handler.router)
     dp.update.outer_middleware(BackendMiddleware(base_api))
     await bot.delete_webhook(drop_pending_updates=True)
     try:

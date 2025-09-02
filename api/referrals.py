@@ -12,7 +12,7 @@ async def get_referrals(client_id: int) -> List[ReferralsModel]:
 async def create_referral(client_id: int, referral_phone: str, *, is_active: bool = False) -> ReferralsModel:
     payload = {
         "id_client": client_id,
-        "refferal_phone": referral_phone,
+        "referral_phone": referral_phone,
         # "is_active": is_active,
     }
     data = await base_api.post("/referrals", json=payload)

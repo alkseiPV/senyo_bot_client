@@ -6,6 +6,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message, CallbackQuery
 
+from aiogram.filters import StateFilter
+
 from api.client import get_client_info  # Для перезапроса клиента
 from api.address import create_address, delete_address  # API для адресов
 from models.address import AddressModel  # Модель адреса
@@ -18,6 +20,7 @@ router = Router()
 
 # FSM для адресов
 class Addresses(StatesGroup):
+    my_addresses = State()
     waiting_for_new_address = State()  # Ожидание ввода нового адреса
     in_delete_mode = State()  # В режиме удаления (для хранения message_id)
 
@@ -40,6 +43,7 @@ async def show_addresses(message: Message, state: FSMContext):
             text = "Ваши адреса:\n"
             for i, addr in enumerate(addresses, start=1):
                 text += f"{i}. {addr.address}\n"
+            await state.set_state(Addresses.my_addresses)
             keyboard = addresses_main_keyboard(has_addresses=True)
 
         await message.answer(text, reply_markup=keyboard)
@@ -47,6 +51,27 @@ async def show_addresses(message: Message, state: FSMContext):
         logger.error(f"Ошибка при получении адресов: {e}")
         await message.answer("Произошла ошибка. Попробуйте позже.", reply_markup=profile_keyboard())
         await state.set_state(None)
+        
+@router.message(Addresses.waiting_for_new_address, F.text == "Назад")
+@router.message(Addresses.in_delete_mode, F.text == "Назад")
+async def go_back_from_substates(message: Message, state: FSMContext):
+    """Возвращаем из добавления/удаления в основной экран адресов."""
+    # Удаляем сообщение удаления, если оно есть
+    data = await state.get_data()
+    delete_message_id = data.get("delete_message_id")
+    if delete_message_id:
+        try:
+            await message.bot.delete_message(chat_id=message.chat.id, message_id=delete_message_id)
+        except:
+            pass
+    await message.answer("Возвращаемся к списку адресов.")
+    await show_addresses(message, state)
+        
+@router.message(StateFilter( Addresses.my_addresses), F.text == "Назад")
+async def go_back_from_my_addresses(message: Message, state: FSMContext):
+    """Возвращаем из my_addresses в профиль."""
+    await state.set_state(None)
+    await message.answer("Возвращаемся в профиль:", reply_markup=profile_keyboard())
 
 # ──────────────────────────
 #   Добавить адрес (reply)
@@ -55,7 +80,7 @@ async def show_addresses(message: Message, state: FSMContext):
 async def start_add_address(message: Message, state: FSMContext):
     """Просим ввести новый адрес с reply 'Назад'."""
     await message.answer(
-        "Введите свой адрес с городом и почт. индекс. Пример: Москва, ул Пушкина д30 к22",
+        "Введите свой адрес с городом. Пример: Москва, ул Пушкина д30 к22",
         reply_markup=back_reply_keyboard(),
     )
     await state.set_state(Addresses.waiting_for_new_address)
@@ -64,6 +89,9 @@ async def start_add_address(message: Message, state: FSMContext):
 async def receive_new_address(message: Message, state: FSMContext):
     """Создаём адрес, обновляем state и возвращаем к основному экрану."""
     new_address = message.text.strip()
+    if new_address == "Назад":
+        state.set_state(Addresses.my_addresses)
+        await show_addresses(message, state)
     if not new_address:
         await message.answer("Адрес не может быть пустым. Попробуйте снова:")
         return
@@ -146,6 +174,8 @@ async def delete_address_callback(callback: CallbackQuery, state: FSMContext):
     except Exception as e:
         logger.error(f"Ошибка при удалении адреса: {e}")
         await callback.message.answer("Произошла ошибка при удалении. Попробуйте позже.")
+        
+
 
 # ──────────────────────────
 #   Назад (reply) — из любого состояния

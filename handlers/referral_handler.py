@@ -30,11 +30,8 @@ async def invite_friend(message:Message,state:FSMContext):
     )
 
     await message.answer(
-        "👥 Нужно ввести номер телефона друга, когда он активирует бота и запишется на первый приём, "
-        "вам обоим начислится по 500 баллов. пример ввода:\n"
-        "7 800 555 35 35\n"
-        "(можно без пробелов)\n"
-        "78005553535",
+        "👥 Введите номер телефона друга. Когда он активирует бота и запишется на первый приём, вам обоим начислится по 500 баллов.\n"
+        "Пример ввода: 7 800 555 35 35 или 78005553535",
         reply_markup=back_kb,
     )
     await state.set_state(ReferralState.waiting_for_phone)
@@ -48,6 +45,7 @@ async def procces_referral_phone(message:Message,state:FSMContext):
     После успеха или ошибки возвращает в главное меню.
     """
     if message.text =="Назад":
+        await state.set_state(None)
         await message.answer("😔 Приглашения отменено.", reply_markup=main_menu_keyboard())
         return
     
@@ -80,4 +78,4 @@ async def procces_referral_phone(message:Message,state:FSMContext):
             error_msg = "❌ Этот номер уже приглашён вами или кем-то другим."
         await message.answer(error_msg, reply_markup=main_menu_keyboard())
     
-    await state.clear()
+    await state.set_state(None)

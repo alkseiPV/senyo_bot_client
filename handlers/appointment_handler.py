@@ -40,6 +40,12 @@ async def start_appointment(message: Message, state: FSMContext):
     data = await state.get_data()
     await message.answer("📅Записаться на приём:", reply_markup=appointment_keyboard(data))
     await state.set_state(AppointmentStates.menu)
+    
+@router.message(StateFilter(AppointmentStates.choosing_service, AppointmentStates.choosing_place, AppointmentStates.choosing_time, AppointmentStates.choosing_points, AppointmentStates.choosing_address, AppointmentStates.waiting_new_address), F.text == "Назад")
+async def back_to_menu(message: Message, state: FSMContext):
+    await state.set_state(AppointmentStates.menu)
+    data = await state.get_data()
+    await message.answer("Возвращаемся в меню записи.", reply_markup=appointment_keyboard(data))
 
 
 @router.message(AppointmentStates.menu, F.text.regexp(r"^Списать баллы \(.*\)$"))
@@ -139,15 +145,15 @@ async def select_service(message: Message, state: FSMContext):
 @router.message(AppointmentStates.menu,F.text.regexp(r"^Время \(.*\)$"))
 async def start_choose_time(message: Message, state: FSMContext):
     """Начинаем ввод времени."""
-    await message.answer("Введите дату и время в формате YYYY-MM-DD HH:MM (например, 2025-08-17 14:00):", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Введите дату и время в формате DD-MM-YYYY HH:MM (например, 17-08-2025 14:00):", reply_markup=ReplyKeyboardRemove())
     await state.set_state(AppointmentStates.choosing_time)
 
 @router.message(AppointmentStates.choosing_time)
 async def select_time(message: Message, state: FSMContext):
     try:
-        dt = datetime.strptime(message.text, "%Y-%m-%d %H:%M")
+        dt = datetime.strptime(message.text, "%d-%m-%Y %H:%M")
         if dt < datetime.now():
-            await message.answer("Дата и время должны быть в будущем. Попробуйте снова (YYYY-MM-DD HH:MM).")
+            await message.answer("Дата и время должны быть в будущем. Попробуйте снова (DD-MM-YYYY HH:MM).")
             return  # Остаёмся в том же состоянии для повторного ввода
         
         await state.update_data(selected_date=dt.isoformat())
@@ -155,7 +161,7 @@ async def select_time(message: Message, state: FSMContext):
         data = await state.get_data()
         await message.answer(f"Время выбрано: {message.text}", reply_markup=appointment_keyboard(data))
     except ValueError:
-        await message.answer("Неверный формат. Попробуйте снова (YYYY-MM-DD HH:MM).")
+        await message.answer("Неверный формат. Попробуйте снова (DD-MM-YYYY HH:MM).")
         
 
 @router.message(AppointmentStates.menu,F.text.regexp(r"^Место проведения \(.*\)$"))

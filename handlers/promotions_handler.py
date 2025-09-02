@@ -22,11 +22,12 @@ async def show_promotions(message:Message):
             return
         promo_text = "🎁 Доступные промоакции: \n\n"
         for promo in promotions:
+            gender_text = "мужчин" if promo.gender == "Мужской" else "женщин" if promo.gender == "Женский" else "всех"
             promo_text += (
                 f"**{promo.title}**\n"
                 f"{promo.description}\n"
                 f"💰 Баллы: {promo.added_points}\n"
-                f"Для: {promo.gender}\n"
+                f"Для: {  gender_text }\n"
                 f"С {promo.start_date.strftime('%d.%m.%Y')} по {promo.expiration_date.strftime('%d.%m.%Y')}\n\n"
             )
         await message.answer(

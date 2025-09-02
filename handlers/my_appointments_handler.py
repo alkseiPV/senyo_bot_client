@@ -32,6 +32,7 @@ async def show_my_appointments(message: Message, state: FSMContext):
         
         if not active_appointments:
             text = "😔 У вас нет активных записей."
+            keyboard = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="Назад")]], resize_keyboard=True)
         else:
             text = "📅 Ваши активные записи: \n\n"
             active_appointments.sort(key=lambda a: a.date)
@@ -39,9 +40,8 @@ async def show_my_appointments(message: Message, state: FSMContext):
                 status_text = "подтверждена" if app.status == "подтвержден" else "ожидание"
                 time_str = app.date.strftime("%d.%m.%Y %H:%M")
                 text += f"{time_str}\n{app.service_name} ({status_text})\n\n"
-        
-        keyboard = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="Отменить запись")],
-                [KeyboardButton(text="Назад")],], resize_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="Отменить запись")],
+                                             [KeyboardButton(text="Назад")]], resize_keyboard=True)
         await message.answer(text, reply_markup=keyboard)
         await state.set_state(MyAppointments.viewing)
     except Exception as e:
